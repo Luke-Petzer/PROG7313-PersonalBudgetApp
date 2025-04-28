@@ -32,5 +32,11 @@ abstract class AppDatabase : RoomDatabase() {
                 instance
             }
         }
+
+        // Add this method
+        fun destroyDatabase(context: Context) {
+            context.deleteDatabase("app_database")
+            INSTANCE = null
+        }
     }
 }
