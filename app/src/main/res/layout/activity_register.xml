@@ -4,15 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA"
-    tools:context=".RegisterActivity">
+    android:background="#FAFAFA">
 
     <ImageView
         android:id="@+id/logoImageView"
         android:layout_width="199dp"
         android:layout_height="211dp"
         android:layout_marginTop="14dp"
-        android:src="@drawable/sik_logo"
+        android:src="@drawable/ic_launcher_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -67,7 +66,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edit_text_background"
                 android:drawableStart="@drawable/person_ic"
                 android:drawablePadding="12dp"
                 android:hint="Enter your name"
@@ -88,7 +86,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edit_text_background"
                 android:drawableStart="@drawable/person_ic"
                 android:drawablePadding="12dp"
                 android:hint="Enter your username"
@@ -109,7 +106,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edit_text_background"
                 android:drawableStart="@drawable/mail_ic"
                 android:drawablePadding="12dp"
                 android:hint="Enter your email"
@@ -130,7 +126,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="42dp"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edit_text_background"
                 android:drawableStart="@drawable/lock_ic"
                 android:drawablePadding="12dp"
                 android:hint="Enter your password"
@@ -143,7 +138,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="24dp"
-                android:background="@drawable/button_background"
                 android:text="Register"
                 android:textColor="#FFFFFF" />
 
@@ -156,7 +150,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="Forgot your password?"
+        android:text="@string/forgot_password"
         android:textColor="#525252"
         android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@+id/loginTextView"
@@ -168,7 +162,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Have an account? Login"
+        android:text="@string/have_Account"
         android:textColor="#525252"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"

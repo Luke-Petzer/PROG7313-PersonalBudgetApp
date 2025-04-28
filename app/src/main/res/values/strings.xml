@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">ST10298850-PROG7313-P2-LP</string>
+    <string name="new_transaction">New Transaction</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="initial_amount">R0.00</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="choose_payee">Choose Payee</string>
+    <string name="choose_category">Choose Category</string>
+    <string name="select_account">Select Account</string>
+    <string name="today_2025">Today, 2025</string>
+    <string name="add_description">Add description</string>
+    <string name="add_receipt">Add Receipt</string>
+    <string name="repeat">Repeat</string>
+    <string name="add_transaction">Add Transaction</string>
+    <string name="login_slogan">Zero-Based Budgeting Made Simple</string>
+    <string name="login_to_account">Login to your account</string>
+    <string name="email">Email</string>
+    <string name="enter_email">Enter your email</string>
+    <string name="password">Password</string>
+    <string name="enter_password">Enter your password</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="sign_up_prompt">Don\'t have an account? Sign up</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_confirm_password">Re-enter your password</string>
+    <string name="have_Account">Have an account? Login</string>
 </resources>
