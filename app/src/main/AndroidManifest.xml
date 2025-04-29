@@ -20,6 +20,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity" />
+        <activity android:name=".HomeActivity" />
+        <activity android:name=".AddTransactionActivity" />
+        <activity android:name=".StatsActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".TransactionHistoryActivity" />
+<!--        <activity android:name=".ManageAccountsActivity" />-->
+        <activity android:name=".ManageCategoriesActivity" />
     </application>
 
 </manifest>

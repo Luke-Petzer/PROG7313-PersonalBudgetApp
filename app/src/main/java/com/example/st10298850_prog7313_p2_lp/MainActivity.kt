@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Add these lines to drop and recreate the database
-        AppDatabase.destroyDatabase(applicationContext)
         database = AppDatabase.getDatabase(this)
 
         enableEdgeToEdge()
@@ -67,7 +66,12 @@ class MainActivity : AppCompatActivity() {
                     database.userDao().updateLoginStreak(user.userId, streak, currentDate)
 
                     Toast.makeText(this@MainActivity, "Login successful", Toast.LENGTH_SHORT).show()
-                    // TODO: Navigate to the main app screen
+                    
+                    // Navigate to the HomeActivity
+                    val intent = Intent(this@MainActivity, HomeActivity::class.java)
+                    intent.putExtra("USER_ID", user.userId)
+                    startActivity(intent)
+                    finish() // Close the MainActivity so the user can't go back to it
                 } else {
                     Toast.makeText(this@MainActivity, "Invalid email or password", Toast.LENGTH_SHORT).show()
                 }

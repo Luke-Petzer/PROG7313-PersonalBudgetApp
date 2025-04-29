@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
     entities = [User::class, Transaction::class, Account::class, BudgetGoal::class, Category::class],
@@ -27,16 +31,30 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                )
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // Pre-populate database with initial data
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val database = getDatabase(context)
+                            val userDao = database.userDao()
+                            if (userDao.getUserCount() == 0) {
+                                val initialUser = User(
+                                    email = "admin@gmail.com",
+                                    password = "Admin123$",
+                                    name = "Admin"
+                                )
+                                userDao.insertUser(initialUser)
+                            }
+                        }
+                    }
+                })
+                .build()
                 INSTANCE = instance
                 instance
             }
         }
-
-        // Add this method
-        fun destroyDatabase(context: Context) {
-            context.deleteDatabase("app_database")
-            INSTANCE = null
-        }
     }
 }
+

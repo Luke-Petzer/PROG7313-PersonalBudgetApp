@@ -9,4 +9,13 @@
     <color name="textColorSecondary">#525252</color>
     <color name="hintColor">#ADAEBC</color>
     <color name="backgroundColor">#FAFAFA</color>
+    <color name="background_color">#FAFAFA</color>
+    <color name="text_color_primary">#171717</color>
+    <color name="text_color_secondary">#525252</color>
+    <color name="progress_bar_color">#1E7A53</color>
+    <color name="progress_bar_background">#E5E5E5</color>
+    <color name="blue">#3B82F6</color>
+    <color name="progress_color">#1E7A53</color>
+    <color name="progress_background_color">#E5E5E5</color>
+
 </resources>

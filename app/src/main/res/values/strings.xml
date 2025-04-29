@@ -26,4 +26,11 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="enter_confirm_password">Re-enter your password</string>
     <string name="have_Account">Have an account? Login</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_stats">Stats</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_budget">Budget</string>
+    <string name="menu_settings">Settings</string>
+    <string name="budget_goals">Budget Goals</string>
+    <string name="categories">Categories</string>
 </resources>
