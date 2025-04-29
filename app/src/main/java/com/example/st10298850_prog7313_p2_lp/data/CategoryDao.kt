@@ -10,6 +10,12 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE userId = :userId")
     suspend fun getCategoriesForUser(userId: Long): List<Category>
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE userId = :userId AND type = 'Expense'")
-    suspend fun getTotalSpentForUser(userId: Long): Double?
+    @Query("SELECT SUM(budgetedAmount) FROM categories WHERE userId = :userId")
+    suspend fun getTotalBudgetForUser(userId: Long): Double?
+
+    @Update
+    suspend fun updateCategory(category: Category)
+
+    @Delete
+    suspend fun deleteCategory(category: Category)
 }

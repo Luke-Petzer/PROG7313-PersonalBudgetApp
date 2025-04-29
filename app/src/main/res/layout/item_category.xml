@@ -52,7 +52,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvBudgetInfo"
+            android:id="@+id/tvBudgetAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

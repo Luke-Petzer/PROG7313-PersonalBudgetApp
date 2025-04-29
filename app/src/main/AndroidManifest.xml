@@ -25,7 +25,7 @@
         <activity android:name=".StatsActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".TransactionHistoryActivity" />
-<!--        <activity android:name=".ManageAccountsActivity" />-->
+        <activity android:name=".ManageAccountsActivity" />
         <activity android:name=".ManageCategoriesActivity" />
     </application>
 

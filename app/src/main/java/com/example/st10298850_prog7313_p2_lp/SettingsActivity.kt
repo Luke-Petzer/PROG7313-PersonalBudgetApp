@@ -55,7 +55,10 @@ class SettingsActivity : AppCompatActivity() {
             val intent = Intent(this, ManageCategoriesActivity::class.java)
             startActivity(intent)
         }
-
+        binding.btnManageAccounts.setOnClickListener {
+            val intent = Intent(this, ManageAccountsActivity::class.java)
+            startActivity(intent)
+        }
 
         // Add other click listeners here as needed
     }

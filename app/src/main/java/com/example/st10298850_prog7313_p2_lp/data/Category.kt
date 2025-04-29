@@ -17,6 +17,6 @@ import androidx.room.PrimaryKey
 data class Category(
     @PrimaryKey(autoGenerate = true) val categoryId: Long = 0,
     val userId: Long,
-    val name: String,
-    val budgetedAmount: Double
+    var name: String,
+    var budgetedAmount: Double
 )
