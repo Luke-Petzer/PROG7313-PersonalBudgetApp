@@ -138,7 +138,9 @@
                         android:layout_height="wrap_content"
                         android:focusable="false"
                         android:clickable="true"
-                        android:inputType="none" />
+                        android:inputType="none"
+                        android:importantForAccessibility="no"
+                        android:cursorVisible="false"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -163,14 +165,23 @@
                     android:layout_marginTop="8dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etReceipt"
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:focusable="false"
-                        android:clickable="true"
-                        android:inputType="none"
-                         />
+                        android:minHeight="56dp">
+
+                        <ImageView
+                            android:id="@+id/receiptImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/add_a_photo_ic"
+                            android:contentDescription="Upload Receipt"
+                            android:scaleType="centerInside"
+                            android:adjustViewBounds="true"
+                            android:padding="8dp"/>
+
+                    </FrameLayout>
+
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.materialswitch.MaterialSwitch
