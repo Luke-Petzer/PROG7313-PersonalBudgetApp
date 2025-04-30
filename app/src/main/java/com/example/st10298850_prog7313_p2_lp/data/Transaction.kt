@@ -24,7 +24,6 @@ data class Transaction(
     val userId: Long,
     val type: String,  // "Expense" or "Income"
     val amount: Double,
-    val payee: String,
     val accountId: Long,
     val date: Long,
     val description: String,

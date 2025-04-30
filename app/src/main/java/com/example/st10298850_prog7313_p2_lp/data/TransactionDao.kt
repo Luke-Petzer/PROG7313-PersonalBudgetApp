@@ -1,6 +1,9 @@
 package com.example.st10298850_prog7313_p2_lp.data
 
 import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
 
 @Dao
 interface TransactionDao {
