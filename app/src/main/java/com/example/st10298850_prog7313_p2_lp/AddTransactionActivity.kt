@@ -10,7 +10,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Toast
@@ -34,6 +37,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.EditText
 import kotlinx.coroutines.launch
 
 class AddTransactionActivity : AppCompatActivity() {
@@ -84,15 +88,19 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var repeatIntervalAdapter: ArrayAdapter<String>
+    private val repeatIntervals = listOf("Daily", "Weekly", "Monthly", "Yearly")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.btnClose.setOnClickListener {
+            finish() // This will close the current activity and return to the previous one
+        }
         photoUploadImage = binding.receiptImage
 
-        Log.d("AddTransactionActivity", "etCategory null? ${binding.etCategory == null}")
-        Log.d("AddTransactionActivity", "etAccount null? ${binding.etAccount == null}")
 
         photoUploadImage.setOnClickListener {
             checkPermissionsAndShowOptions()
@@ -103,6 +111,8 @@ class AddTransactionActivity : AppCompatActivity() {
         setupDatePickers()
         setupRepeatToggle()
         setupTabLayoutListener()
+
+        setupRepeatFunctionality()
 
         binding.btnAddTransaction.setOnClickListener {
             addTransaction()
@@ -226,6 +236,24 @@ class AddTransactionActivity : AppCompatActivity() {
         val selectedAccount = viewModel.accounts.value?.find { it.name == account }
         val accountId = selectedAccount?.accountId ?: return
 
+        val repeatInterval = if (binding.switchRepeat.isChecked) {
+            when (binding.spinnerRepeatInterval.selectedItem as String) {
+                "Daily" -> "D"
+                "Weekly" -> "W"
+                "Monthly" -> "M"
+                "Yearly" -> "Y"
+                else -> null
+            }
+        } else null
+
+        val repeatUntil = if (binding.switchRepeat.isChecked && binding.etRepeatUntil.text?.isNotEmpty() == true) {
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(binding.etRepeatUntil.text.toString())?.time
+        } else null
+
+        val repeatCount = if (binding.switchRepeat.isChecked && binding.etRepeatCount.text?.isNotEmpty() == true) {
+            binding.etRepeatCount.text.toString().toIntOrNull()
+        } else null
+
         val transaction = Transaction(
             userId = getCurrentUserId(),
             type = if (binding.tabLayout.selectedTabPosition == 0) "Expense" else "Income",
@@ -234,7 +262,11 @@ class AddTransactionActivity : AppCompatActivity() {
             date = date,
             description = description,
             receiptPath = receiptImageUri?.toString(),
-            repeat = binding.switchRepeat.isChecked
+            repeat = binding.switchRepeat.isChecked,
+            repeatInterval = repeatInterval,
+            repeatUntil = repeatUntil,
+            repeatCount = repeatCount,
+            category = category
         )
 
         viewModel.addTransaction(transaction)
@@ -342,4 +374,55 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     fun getPhotoUri(): Uri? = photoUri
+
+    private fun setupRepeatFunctionality() {
+        // Setup repeat switch
+        binding.switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+            binding.repeatSettingsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        // Setup repeat interval spinner
+        repeatIntervalAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, repeatIntervals)
+        repeatIntervalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerRepeatInterval.adapter = repeatIntervalAdapter
+
+        // Setup repeat until date picker
+        binding.etRepeatUntil.setOnClickListener {
+            showDatePickerDialog(binding.etRepeatUntil)
+        }
+
+        // Setup repeat count input
+        binding.etRepeatCount.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (!s.isNullOrEmpty()) {
+                    binding.etRepeatUntil.isEnabled = false
+                    binding.etRepeatUntil.text?.clear()
+                } else {
+                    binding.etRepeatUntil.isEnabled = true
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+private fun showDatePickerDialog(editText: EditText) {
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(
+        this,
+        { _, selectedYear, selectedMonth, selectedDay ->
+            val selectedDate = Calendar.getInstance()
+            selectedDate.set(selectedYear, selectedMonth, selectedDay)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            editText.setText(dateFormat.format(selectedDate.time))
+        },
+        year, month, day
+    )
+
+    datePickerDialog.show()
+}
 }

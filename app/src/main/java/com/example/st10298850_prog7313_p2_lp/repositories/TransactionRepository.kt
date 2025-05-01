@@ -9,5 +9,9 @@ class TransactionRepository(private val transactionDao: TransactionDao) {
         transactionDao.insertTransaction(transaction)
     }
 
+    suspend fun getAllTransactions(): List<Transaction> {
+        return transactionDao.getAllTransactions()
+    }
+
     // Add other methods as needed, such as getTransactions(), updateTransaction(), etc.
 }

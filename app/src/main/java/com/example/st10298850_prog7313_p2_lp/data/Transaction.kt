@@ -28,5 +28,9 @@ data class Transaction(
     val date: Long,
     val description: String,
     val receiptPath: String?,
-    val repeat: Boolean
+    val repeat: Boolean,
+    val repeatInterval: String? = null,
+    val repeatUntil: Long? = null,
+    val repeatCount: Int? = null,
+    val category: String  // Add this line
 )

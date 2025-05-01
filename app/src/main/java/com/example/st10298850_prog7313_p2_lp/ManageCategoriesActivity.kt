@@ -37,9 +37,7 @@ class ManageCategoriesActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener {
             finish()
         }
-        binding.fabAddCategory.setOnClickListener {
-            showEditCategoryDialog()
-        }
+        // Removed FAB click listener for adding new category
     }
 
     private fun setupRecyclerView() {
@@ -67,19 +65,15 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
-    private fun showEditCategoryDialog(category: Category? = null) {
+    private fun showEditCategoryDialog(category: Category) {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val dialogBinding = DialogEditCategoryBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
 
-        if (category != null) {
-            dialogBinding.tvTitle.text = "Edit Category"
-            dialogBinding.etCategoryName.setText(category.name)
-            dialogBinding.etBudgetAmount.setText(category.budgetedAmount.toString())
-        } else {
-            dialogBinding.tvTitle.text = "Add Category"
-        }
+        dialogBinding.tvTitle.text = "Edit Category"
+        dialogBinding.etCategoryName.setText(category.name)
+        dialogBinding.etBudgetAmount.setText(category.budgetedAmount.toString())
 
         dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
         dialogBinding.btnSaveChanges.setOnClickListener {
@@ -87,14 +81,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
             val amount = dialogBinding.etBudgetAmount.text.toString().toDoubleOrNull()
 
             if (name.isNotEmpty() && amount != null && amount > 0) {
-                if (category == null) {
-                    val newCategory = Category(userId = 1, name = name, budgetedAmount = amount)
-                    addCategory(newCategory)
-                } else {
-                    category.name = name
-                    category.budgetedAmount = amount
-                    updateCategory(category)
-                }
+                category.name = name
+                category.budgetedAmount = amount
+                updateCategory(category)
                 dialog.dismiss()
             } else {
                 Toast.makeText(this, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
@@ -102,14 +91,6 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
 
         dialog.show()
-    }
-
-    private fun addCategory(category: Category) {
-        lifecycleScope.launch {
-            database.categoryDao().insertCategory(category)
-            loadCategories()
-            updateTotalBudget()
-        }
     }
 
     private fun updateCategory(category: Category) {

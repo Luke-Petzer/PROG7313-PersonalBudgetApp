@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [User::class, Transaction::class, Account::class, BudgetGoal::class, Category::class],
-    version = 2, // Keep this updated when you change the schema
+    version = 3, // Increment the version number
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,42 +24,32 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
-        private const val DATABASE_VERSION = 2 // This should match the version in @Database
+        private const val DATABASE_NAME = "app_database"
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val prefs = context.getSharedPreferences("database_version", Context.MODE_PRIVATE)
-                val storedVersion = prefs.getInt("version", 0)
-
-                val builder = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "app_database"
-                )
-
-                if (storedVersion != DATABASE_VERSION) {
-                    builder.fallbackToDestructiveMigration()
-                }
-
-                builder.addCallback(object : RoomDatabase.Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            seedDatabase(getDatabase(context))
-                        }
-                    }
-
-                    override fun onOpen(db: SupportSQLiteDatabase) {
-                        super.onOpen(db)
-                        // Update the stored version number
-                        prefs.edit().putInt("version", DATABASE_VERSION).apply()
-                    }
-                })
-
-                val instance = builder.build()
+                val instance = createDatabase(context)
                 INSTANCE = instance
                 instance
             }
+        }
+
+        private fun createDatabase(context: Context): AppDatabase {
+            return Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                DATABASE_NAME
+            )
+            .fallbackToDestructiveMigration()
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        seedDatabase(getDatabase(context))
+                    }
+                }
+            })
+            .build()
         }
 
         private suspend fun seedDatabase(database: AppDatabase) {
@@ -76,11 +66,48 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         fun deleteDatabase(context: Context) {
-            context.deleteDatabase("app_database")
+            context.deleteDatabase(DATABASE_NAME)
             INSTANCE = null
-            // Also clear the stored version
-            context.getSharedPreferences("database_version", Context.MODE_PRIVATE)
-                .edit().remove("version").apply()
+        }
+
+        fun reinitializeDatabase(context: Context) {
+            deleteDatabase(context)
+            INSTANCE = createDatabase(context)
+            CoroutineScope(Dispatchers.IO).launch {
+                seedDatabase(INSTANCE!!)
+            }
+        }
+
+        fun failoverAndReinitialize(context: Context): AppDatabase {
+            try {
+                return getDatabase(context)
+            } catch (e: Exception) {
+                // Log the exception
+                e.printStackTrace()
+
+                // Attempt to reinitialize the database
+                reinitializeDatabase(context)
+
+                // Return the new instance or throw an exception if it fails again
+                return INSTANCE ?: throw IllegalStateException("Database failed to initialize")
+            }
+        }
+
+        // New method for failover database deletion and recreation
+        fun forceDeleteAndRecreateDatabase(context: Context): AppDatabase {
+            // Delete the existing database
+            deleteDatabase(context)
+
+            // Recreate the database
+            val newInstance = createDatabase(context)
+            INSTANCE = newInstance
+
+            // Reseed the database
+            CoroutineScope(Dispatchers.IO).launch {
+                seedDatabase(newInstance)
+            }
+
+            return newInstance
         }
     }
 }

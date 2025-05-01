@@ -17,5 +17,6 @@
     <color name="blue">#3B82F6</color>
     <color name="progress_color">#1E7A53</color>
     <color name="progress_background_color">#E5E5E5</color>
-
+    <color name="expense_color">#FF5722</color>
+    <color name="income_color">#4CAF50</color>
 </resources>
