@@ -26,8 +26,16 @@ class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.ViewHolde
 
     class ViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
-            binding.tvCategory.text = transaction.category // Use description as category for now
-            binding.tvDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(transaction.date))
+            binding.tvCategory.text = transaction.category
+            
+            // Format both start and end dates
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            val startDateStr = dateFormat.format(Date(transaction.startDate))
+            val endDateStr = dateFormat.format(Date(transaction.endDate))
+            
+            // Combine start and end dates in the date text view
+            binding.tvDate.text = "$startDateStr - $endDateStr"
+            
             binding.tvAmount.text = String.format("%.2f", transaction.amount)
 
             if (transaction.type == "Expense") {

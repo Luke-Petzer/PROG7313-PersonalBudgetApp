@@ -13,7 +13,8 @@ import java.util.Calendar
 
 class TransactionHistoryViewModel(
     application: Application,
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val userId: Long
 ) : AndroidViewModel(application) {
     private val _filteredTransactions = MediatorLiveData<List<Transaction>>()
     val filteredTransactions: LiveData<List<Transaction>> = _filteredTransactions
@@ -32,14 +33,14 @@ class TransactionHistoryViewModel(
 
     private fun loadTransactions() {
         viewModelScope.launch {
-            val allTransactions = repository.getAllTransactions()
+            val allTransactions = repository.getTransactionsForUser(userId)
             _filteredTransactions.value = allTransactions
         }
     }
 
     private fun loadCategories() {
         viewModelScope.launch {
-            val allTransactions = repository.getAllTransactions()
+            val allTransactions = repository.getTransactionsForUser(userId)
             _categories.value = allTransactions.mapNotNull { it.category }.distinct()
         }
     }
@@ -79,10 +80,10 @@ class TransactionHistoryViewModel(
 
     private fun applyFilters() {
         viewModelScope.launch {
-            val allTransactions = repository.getAllTransactions()
+            val allTransactions = repository.getTransactionsForUser(userId)
             val filtered = allTransactions.filter { transaction ->
-                val matchesDate = (startDate == null || transaction.date >= startDate!!) &&
-                                  (endDate == null || transaction.date <= endDate!!)
+                val matchesDate = (startDate == null || transaction.startDate >= startDate!!) &&
+                                  (endDate == null || transaction.endDate <= endDate!!)
                 val matchesCategory = selectedCategory == null || selectedCategory == "All Categories" || transaction.category == selectedCategory
                 matchesDate && matchesCategory
             }

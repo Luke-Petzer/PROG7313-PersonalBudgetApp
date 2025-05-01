@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.st10298850_prog7313_p2_lp.databinding.ActivityTransactionHistoryBinding
+import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.util.*
@@ -24,14 +25,23 @@ class TransactionHistoryActivity : AppCompatActivity() {
         binding = ActivityTransactionHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupViewModel()
+        val userId = UserSessionManager.getUserId(this)
+        if (userId == -1L) {
+            // Handle user not logged in, redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
+        setupViewModel(userId)
         setupRecyclerView()
         setupUI()
         observeTransactions()
     }
 
-    private fun setupViewModel() {
-        val factory = TransactionHistoryViewModelFactory(application)
+    private fun setupViewModel(userId: Long) {
+        val factory = TransactionHistoryViewModelFactory(application, userId)
         viewModel = ViewModelProvider(this, factory)[TransactionHistoryViewModel::class.java]
     }
 

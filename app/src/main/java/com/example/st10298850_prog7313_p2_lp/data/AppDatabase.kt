@@ -10,8 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [User::class, Transaction::class, Account::class, BudgetGoal::class, Category::class],
-    version = 3, // Increment the version number
+    entities = [User::class, Transaction::class, Account::class, BudgetGoal::class, Category::class, MonthlyGoal::class],
+    version = 6, // Increment the version number
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -20,6 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun budgetGoalDao(): BudgetGoalDao
     abstract fun categoryDao(): CategoryDao
+    abstract fun monthlyGoalDao(): MonthlyGoalDao
 
     companion object {
         @Volatile

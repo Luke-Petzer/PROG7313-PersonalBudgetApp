@@ -3,7 +3,6 @@ package com.example.st10298850_prog7313_p2_lp.data
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import java.util.Date
 
 @Entity(
     tableName = "budget_goals",
@@ -20,5 +19,4 @@ data class BudgetGoal(
     val userId: Long,
     val name: String,
     val goalAmount: Double,
-
 )

@@ -38,6 +38,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import android.widget.EditText
+import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
 class AddTransactionActivity : AppCompatActivity() {
@@ -88,8 +89,8 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var repeatIntervalAdapter: ArrayAdapter<String>
-    private val repeatIntervals = listOf("Daily", "Weekly", "Monthly", "Yearly")
+//    private lateinit var repeatIntervalAdapter: ArrayAdapter<String>
+//    private val repeatIntervals = listOf("Daily", "Weekly", "Monthly", "Yearly")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,10 +110,10 @@ class AddTransactionActivity : AppCompatActivity() {
         setupViewModel()
         setupDropdowns()
         setupDatePickers()
-        setupRepeatToggle()
+//        setupRepeatToggle()
         setupTabLayoutListener()
 
-        setupRepeatFunctionality()
+//        setupRepeatFunctionality()
 
         binding.btnAddTransaction.setOnClickListener {
             addTransaction()
@@ -172,19 +173,38 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun setupDatePickers() {
         val calendar = Calendar.getInstance()
 
-        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+        val startDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, month)
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            binding.etDate.setText(dateFormat.format(calendar.time))
+            binding.etStartDate.setText(dateFormat.format(calendar.time))
         }
 
-        binding.etDate.setOnClickListener {
+        val endDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.etEndDate.setText(dateFormat.format(calendar.time))
+        }
+
+        binding.etStartDate.setOnClickListener {
             DatePickerDialog(
                 this@AddTransactionActivity,
-                dateSetListener,
+                startDateSetListener,
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        binding.etEndDate.setOnClickListener {
+            DatePickerDialog(
+                this@AddTransactionActivity,
+                endDateSetListener,
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -192,9 +212,9 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupRepeatToggle() {
-        // Implementation as before
-    }
+//    private fun setupRepeatToggle() {
+//        // Implementation as before
+//    }
 
     private fun setupTabLayoutListener() {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -223,49 +243,35 @@ class AddTransactionActivity : AppCompatActivity() {
         val category = binding.etCategory.text.toString()
         val account = binding.etAccount.text.toString()
         val description = binding.etDescription.text.toString()
-        val dateStr = binding.etDate.text.toString()
+        val startDateStr = binding.etStartDate.text.toString()
+        val endDateStr = binding.etEndDate.text.toString()
 
-        if (amount == null || amount <= 0 || category.isEmpty() || account.isEmpty() || dateStr.isEmpty()) {
+        if (amount == null || amount <= 0 || category.isEmpty() || account.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields with valid values.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)?.time ?: return
+        val startDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(startDateStr)?.time ?: return
+        val endDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(endDateStr)?.time ?: return
 
         // Find the selected account ID
         val selectedAccount = viewModel.accounts.value?.find { it.name == account }
         val accountId = selectedAccount?.accountId ?: return
-
-        val repeatInterval = if (binding.switchRepeat.isChecked) {
-            when (binding.spinnerRepeatInterval.selectedItem as String) {
-                "Daily" -> "D"
-                "Weekly" -> "W"
-                "Monthly" -> "M"
-                "Yearly" -> "Y"
-                else -> null
-            }
-        } else null
-
-        val repeatUntil = if (binding.switchRepeat.isChecked && binding.etRepeatUntil.text?.isNotEmpty() == true) {
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(binding.etRepeatUntil.text.toString())?.time
-        } else null
-
-        val repeatCount = if (binding.switchRepeat.isChecked && binding.etRepeatCount.text?.isNotEmpty() == true) {
-            binding.etRepeatCount.text.toString().toIntOrNull()
-        } else null
 
         val transaction = Transaction(
             userId = getCurrentUserId(),
             type = if (binding.tabLayout.selectedTabPosition == 0) "Expense" else "Income",
             amount = amount,
             accountId = accountId,
-            date = date,
+            startDate = startDate,
+            endDate = endDate,
             description = description,
             receiptPath = receiptImageUri?.toString(),
-            repeat = binding.switchRepeat.isChecked,
-            repeatInterval = repeatInterval,
-            repeatUntil = repeatUntil,
-            repeatCount = repeatCount,
+            // Comment out or remove these lines
+            // repeat = binding.switchRepeat.isChecked,
+            // repeatInterval = repeatInterval,
+            // repeatUntil = repeatUntil,
+            // repeatCount = repeatCount,
             category = category
         )
 
@@ -274,11 +280,77 @@ class AddTransactionActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun getCurrentUserId(): Long {
-        // Implement this method to return the current user's ID
-        // This could be stored in SharedPreferences, a database, or a singleton object
-        return 1 // Placeholder, replace with actual implementation
+//    private fun addTransaction() {
+//        val amountText = binding.tvAmount.text.toString()
+//        val amount = amountText.toDoubleOrNull()
+//
+//        val category = binding.etCategory.text.toString()
+//        val account = binding.etAccount.text.toString()
+//        val description = binding.etDescription.text.toString()
+//        val dateStr = binding.etDate.text.toString()
+//
+//        if (amount == null || amount <= 0 || category.isEmpty() || account.isEmpty() || dateStr.isEmpty()) {
+//            Toast.makeText(this, "Please fill in all required fields with valid values.", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//
+//        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)?.time ?: return
+//
+//        // Find the selected account ID
+//        val selectedAccount = viewModel.accounts.value?.find { it.name == account }
+//        val accountId = selectedAccount?.accountId ?: return
+//
+//        val repeatInterval = if (binding.switchRepeat.isChecked) {
+//            when (binding.spinnerRepeatInterval.selectedItem as String) {
+//                "Daily" -> "D"
+//                "Weekly" -> "W"
+//                "Monthly" -> "M"
+//                "Yearly" -> "Y"
+//                else -> null
+//            }
+//        } else null
+//
+//        val repeatUntil = if (binding.switchRepeat.isChecked && binding.etRepeatUntil.text?.isNotEmpty() == true) {
+//            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(binding.etRepeatUntil.text.toString())?.time
+//        } else null
+//
+//        val repeatCount = if (binding.switchRepeat.isChecked && binding.etRepeatCount.text?.isNotEmpty() == true) {
+//            binding.etRepeatCount.text.toString().toIntOrNull()
+//        } else null
+//
+//        val transaction = Transaction(
+//            userId = getCurrentUserId(),
+//            type = if (binding.tabLayout.selectedTabPosition == 0) "Expense" else "Income",
+//            amount = amount,
+//            accountId = accountId,
+//            date = date,
+//            description = description,
+//            receiptPath = receiptImageUri?.toString(),
+////            repeat = binding.switchRepeat.isChecked,
+////            repeatInterval = repeatInterval,
+////            repeatUntil = repeatUntil,
+////            repeatCount = repeatCount,
+//            category = category
+//        )
+//
+//        viewModel.addTransaction(transaction)
+//        Toast.makeText(this, "Transaction added successfully", Toast.LENGTH_SHORT).show()
+//        finish()
+//    }
+
+private fun getCurrentUserId(): Long {
+    val userId = UserSessionManager.getUserId(this)
+
+    if (userId == -1L) {
+        // Handle user not logged in, e.g., redirect to login
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+        return -1L // Return a default value
     }
+    return userId
+}
+
 
     private fun checkPermissionsAndShowOptions() {
         val permissionsToRequest = mutableListOf<String>()
@@ -375,54 +447,56 @@ class AddTransactionActivity : AppCompatActivity() {
 
     fun getPhotoUri(): Uri? = photoUri
 
-    private fun setupRepeatFunctionality() {
-        // Setup repeat switch
-        binding.switchRepeat.setOnCheckedChangeListener { _, isChecked ->
-            binding.repeatSettingsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
+//    private fun setupRepeatFunctionality() {
+//        // Setup repeat switch
+//        binding.switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+//            binding.repeatSettingsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+//        }
+//
+//        // Setup repeat interval spinner
+//        repeatIntervalAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, repeatIntervals)
+//        repeatIntervalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        binding.spinnerRepeatInterval.adapter = repeatIntervalAdapter
+//
+//        // Setup repeat until date picker
+//        binding.etRepeatUntil.setOnClickListener {
+//            showDatePickerDialog(binding.etRepeatUntil)
+//        }
+//
+//        // Setup repeat count input
+//        binding.etRepeatCount.addTextChangedListener(object : TextWatcher {
+//            override fun afterTextChanged(s: Editable?) {
+//                if (!s.isNullOrEmpty()) {
+//                    binding.etRepeatUntil.isEnabled = false
+//                    binding.etRepeatUntil.text?.clear()
+//                } else {
+//                    binding.etRepeatUntil.isEnabled = true
+//                }
+//            }
+//
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+//        })
+//    }
 
-        // Setup repeat interval spinner
-        repeatIntervalAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, repeatIntervals)
-        repeatIntervalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerRepeatInterval.adapter = repeatIntervalAdapter
 
-        // Setup repeat until date picker
-        binding.etRepeatUntil.setOnClickListener {
-            showDatePickerDialog(binding.etRepeatUntil)
-        }
-
-        // Setup repeat count input
-        binding.etRepeatCount.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                if (!s.isNullOrEmpty()) {
-                    binding.etRepeatUntil.isEnabled = false
-                    binding.etRepeatUntil.text?.clear()
-                } else {
-                    binding.etRepeatUntil.isEnabled = true
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-    }
-private fun showDatePickerDialog(editText: EditText) {
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    val datePickerDialog = DatePickerDialog(
-        this,
-        { _, selectedYear, selectedMonth, selectedDay ->
-            val selectedDate = Calendar.getInstance()
-            selectedDate.set(selectedYear, selectedMonth, selectedDay)
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            editText.setText(dateFormat.format(selectedDate.time))
-        },
-        year, month, day
-    )
-
-    datePickerDialog.show()
-}
+//private fun showDatePickerDialog(editText: EditText) {
+//    val calendar = Calendar.getInstance()
+//    val year = calendar.get(Calendar.YEAR)
+//    val month = calendar.get(Calendar.MONTH)
+//    val day = calendar.get(Calendar.DAY_OF_MONTH)
+//
+//    val datePickerDialog = DatePickerDialog(
+//        this,
+//        { _, selectedYear, selectedMonth, selectedDay ->
+//            val selectedDate = Calendar.getInstance()
+//            selectedDate.set(selectedYear, selectedMonth, selectedDay)
+//            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+//            editText.setText(dateFormat.format(selectedDate.time))
+//        },
+//        year, month, day
+//    )
+//
+//    datePickerDialog.show()
+//}
 }

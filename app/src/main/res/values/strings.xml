@@ -39,5 +39,11 @@
     <string name="account_type">Account Type</string>
     <string name="account_amount">Account Amount</string>
     <string name="save_changes">Save Changes</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="description">Description</string>
+    <string name="repeat_transaction">Repeat Transaction</string>
+    <string name="upload_receipt">Upload Receipt</string>
+    <string name="attach_receipt">Attach Receipt</string>
 
 </resources>

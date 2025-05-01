@@ -37,12 +37,12 @@
                         android:layout_height="wrap_content"
                         android:src="@android:drawable/ic_menu_close_clear_cancel"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Close" />
+                         />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="New Transaction"
+                        android:text="@string/new_transaction"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_centerInParent="true" />
@@ -60,12 +60,12 @@
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Expense" />
+                        android:text="@string/expense" />
 
                     <com.google.android.material.tabs.TabItem
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Income" />
+                        android:text="@string/income" />
 
                 </com.google.android.material.tabs.TabLayout>
 
@@ -74,42 +74,30 @@
                     android:id="@+id/tvAmount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="R0.00"
+                    android:hint="@string/enter_amount"
                     android:textSize="36sp"
                     android:textStyle="bold"
                     android:textColor="#FF9800"
                     android:gravity="center"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
-                    android:inputType="numberDecimal" />
+                    android:inputType="numberDecimal"
+                    android:autofillHints="" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Enter amount"
+                    android:text="@string/enter_amount"
                     android:textSize="14sp"
                     android:gravity="center"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Input Fields -->
-<!--                <com.google.android.material.textfield.TextInputLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:hint="Payee"-->
-<!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">-->
-
-<!--                    <com.google.android.material.textfield.TextInputEditText-->
-<!--                        android:id="@+id/etPayee"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:inputType="textPersonName" />-->
-<!--                </com.google.android.material.textfield.TextInputLayout>-->
-
                 <AutoCompleteTextView
                     android:id="@+id/etCategory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Choose Category"
+                    android:hint="@string/choose_category"
                     android:inputType="none"
                     android:padding="16dp"
                     android:layout_marginTop="16dp"
@@ -119,35 +107,54 @@
                     android:id="@+id/etAccount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Select Account"
+                    android:hint="@string/select_account"
                     android:inputType="none"
                     android:padding="16dp"
                     android:layout_marginTop="16dp"
                     android:dropDownHeight="wrap_content" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilStartDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Select Date"
+                    android:hint="@string/start_date"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="16dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etDate"
+                        android:id="@+id/etStartDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:focusable="false"
                         android:clickable="true"
+                        android:focusableInTouchMode="false"
                         android:inputType="none"
                         android:importantForAccessibility="no"
                         android:cursorVisible="false"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEndDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Description"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEndDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/end_date"
+                        android:inputType="date"
+                        android:focusable="false" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/description"
+                    android:layout_marginTop="16dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -161,8 +168,8 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Attach Receipt"
-                    android:layout_marginTop="8dp"
+                    android:hint="@string/attach_receipt"
+                    android:layout_marginTop="16dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <FrameLayout
@@ -175,7 +182,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:src="@drawable/add_a_photo_ic"
-                            android:contentDescription="Upload Receipt"
+                            android:contentDescription="@string/upload_receipt"
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:padding="8dp"/>
@@ -184,74 +191,77 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchRepeat"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Repeat this transaction?"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp" />
+<!--                <com.google.android.material.materialswitch.MaterialSwitch-->
+<!--                    android:id="@+id/switchRepeat"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/repeat_transaction"-->
+<!--                    android:layout_marginTop="16dp"-->
+<!--                    android:layout_marginBottom="8dp" />-->
 
-                <!-- Container for Repeat Settings, initially hidden -->
-                <LinearLayout
-                    android:id="@+id/repeatSettingsContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:layout_marginTop="8dp">
+<!--                &lt;!&ndash; Container for Repeat Settings, initially hidden &ndash;&gt;-->
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/repeatSettingsContainer"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:visibility="gone"-->
+<!--                    android:layout_marginTop="16dp">-->
 
-                    <!-- Repeat Interval Spinner -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Repeat every"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+<!--                    &lt;!&ndash; Repeat Interval Spinner &ndash;&gt;-->
+<!--                    <com.google.android.material.textfield.TextInputLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="@string/repeat_every"-->
+<!--                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">-->
 
-                        <Spinner
-                            android:id="@+id/spinnerRepeatInterval"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </com.google.android.material.textfield.TextInputLayout>
+<!--                        <Spinner-->
+<!--                            android:id="@+id/spinnerRepeatInterval"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content" />-->
+<!--                    </com.google.android.material.textfield.TextInputLayout>-->
 
-                    <!-- Optionally, Repeat Until Date Picker -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Repeat until"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+<!--                    &lt;!&ndash; Optionally, Repeat Until Date Picker &ndash;&gt;-->
+<!--                    <com.google.android.material.textfield.TextInputLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="@string/repeat_until"-->
+<!--                        android:layout_marginTop="16dp"-->
+<!--                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">-->
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etRepeatUntil"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:focusable="false"
-                            android:clickable="true" />
-                    </com.google.android.material.textfield.TextInputLayout>
+<!--                        <com.google.android.material.textfield.TextInputEditText-->
+<!--                            android:id="@+id/etRepeatUntil"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:inputType="none"-->
+<!--                            android:focusable="false"-->
+<!--                            android:clickable="true"-->
+<!--                            android:focusableInTouchMode="false" />-->
+<!--                    </com.google.android.material.textfield.TextInputLayout>-->
 
-                    <!-- Optionally, Repeat for X Occurrences -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Repeat for"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+<!--                    &lt;!&ndash; Optionally, Repeat for X Occurrences &ndash;&gt;-->
+<!--                    <com.google.android.material.textfield.TextInputLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="@string/repeat_for"-->
+<!--                        android:layout_marginTop="16dp"-->
+<!--                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">-->
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etRepeatCount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number" />
-                    </com.google.android.material.textfield.TextInputLayout>
+<!--                        <com.google.android.material.textfield.TextInputEditText-->
+<!--                            android:id="@+id/etRepeatCount"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:inputType="number" />-->
+<!--                    </com.google.android.material.textfield.TextInputLayout>-->
 
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
                 <!-- Submit Button -->
                 <Button
                     android:id="@+id/btnAddTransaction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Add Transaction"
+                    android:text="@string/add_transaction"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#6200EE"
                     android:layout_marginTop="24dp" />

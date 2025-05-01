@@ -12,6 +12,7 @@ import com.example.st10298850_prog7313_p2_lp.databinding.ActivityManageCategorie
 import com.example.st10298850_prog7313_p2_lp.databinding.DialogEditCategoryBinding
 import com.example.st10298850_prog7313_p2_lp.data.AppDatabase
 import com.example.st10298850_prog7313_p2_lp.data.Category
+import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
 class ManageCategoriesActivity : AppCompatActivity() {
@@ -25,19 +26,32 @@ class ManageCategoriesActivity : AppCompatActivity() {
         binding = ActivityManageCategoriesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userId = UserSessionManager.getUserId(this)
+        if (userId == -1L) {
+            // User not logged in, redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         database = AppDatabase.getDatabase(this)
 
         setupClickListeners()
+        
         setupRecyclerView()
-        loadCategories()
-        updateTotalBudget()
+        loadCategories(userId)
+        updateTotalBudget(userId)
     }
 
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener {
             finish()
         }
-        // Removed FAB click listener for adding new category
+        
+        binding.fabAddCategory.setOnClickListener {
+            showEditCategoryDialog()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -51,29 +65,32 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadCategories() {
+    private fun loadCategories(userId: Long) {
         lifecycleScope.launch {
-            val categories = database.categoryDao().getCategoriesForUser(1) // Assuming user ID 1 for now
+            val categories = database.categoryDao().getCategoriesForUser(userId)
             categoryAdapter.submitList(categories)
         }
     }
 
-    private fun updateTotalBudget() {
+    private fun updateTotalBudget(userId: Long) {
         lifecycleScope.launch {
-            val totalBudget = database.categoryDao().getTotalBudgetForUser(1) ?: 0.0
+            val totalBudget = database.categoryDao().getTotalBudgetForUser(userId) ?: 0.0
             binding.tvTotalBudget.text = String.format("R%.2f", totalBudget)
         }
     }
 
-    private fun showEditCategoryDialog(category: Category) {
+    private fun showEditCategoryDialog(category: Category? = null) {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val dialogBinding = DialogEditCategoryBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
 
-        dialogBinding.tvTitle.text = "Edit Category"
-        dialogBinding.etCategoryName.setText(category.name)
-        dialogBinding.etBudgetAmount.setText(category.budgetedAmount.toString())
+        val isNewCategory = category == null
+        dialogBinding.tvTitle.text = if (isNewCategory) "Add Category" else "Edit Category"
+        if (!isNewCategory) {
+            dialogBinding.etCategoryName.setText(category?.name)
+            dialogBinding.etBudgetAmount.setText(category?.budgetedAmount.toString())
+        }
 
         dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
         dialogBinding.btnSaveChanges.setOnClickListener {
@@ -81,9 +98,15 @@ class ManageCategoriesActivity : AppCompatActivity() {
             val amount = dialogBinding.etBudgetAmount.text.toString().toDoubleOrNull()
 
             if (name.isNotEmpty() && amount != null && amount > 0) {
-                category.name = name
-                category.budgetedAmount = amount
-                updateCategory(category)
+                val userId = UserSessionManager.getUserId(this)
+                if (isNewCategory) {
+                    val newCategory = Category(name = name, budgetedAmount = amount, userId = userId)
+                    addCategory(newCategory)
+                } else {
+                    category?.name = name
+                    category?.budgetedAmount = amount
+                    updateCategory(category!!)
+                }
                 dialog.dismiss()
             } else {
                 Toast.makeText(this, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
@@ -94,18 +117,29 @@ class ManageCategoriesActivity : AppCompatActivity() {
     }
 
     private fun updateCategory(category: Category) {
+        val userId = UserSessionManager.getUserId(this)
         lifecycleScope.launch {
             database.categoryDao().updateCategory(category)
-            loadCategories()
-            updateTotalBudget()
+            loadCategories(userId)
+            updateTotalBudget(userId)
         }
     }
 
     private fun deleteCategory(category: Category) {
+        val userId = UserSessionManager.getUserId(this)
         lifecycleScope.launch {
             database.categoryDao().deleteCategory(category)
-            loadCategories()
-            updateTotalBudget()
+            loadCategories(userId)
+            updateTotalBudget(userId)
+        }
+    }
+
+    private fun addCategory(category: Category) {
+        val userId = UserSessionManager.getUserId(this)
+        lifecycleScope.launch {
+            database.categoryDao().insertCategory(category)
+            loadCategories(userId)
+            updateTotalBudget(userId)
         }
     }
 }

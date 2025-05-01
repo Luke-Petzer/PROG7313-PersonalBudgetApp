@@ -25,12 +25,13 @@ data class Transaction(
     val type: String,  // "Expense" or "Income"
     val amount: Double,
     val accountId: Long,
-    val date: Long,
+    val startDate: Long,
+    val endDate: Long,
     val description: String,
     val receiptPath: String?,
-    val repeat: Boolean,
-    val repeatInterval: String? = null,
-    val repeatUntil: Long? = null,
-    val repeatCount: Int? = null,
+//    val repeat: Boolean,
+//    val repeatInterval: String? = null,
+//    val repeatUntil: Long? = null,
+//    val repeatCount: Int? = null,
     val category: String  // Add this line
 )

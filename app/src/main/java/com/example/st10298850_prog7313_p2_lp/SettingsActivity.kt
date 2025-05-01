@@ -62,4 +62,9 @@ class SettingsActivity : AppCompatActivity() {
 
         // Add other click listeners here as needed
     }
+//    This is for the logout functionality
+//    UserSessionManager.clearSession(this)
+//    val intent = Intent(this, MainActivity::class.java)
+//    startActivity(intent)
+//    finish()
 }

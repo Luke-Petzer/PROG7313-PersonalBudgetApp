@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.st10298850_prog7313_p2_lp.data.AppDatabase
 import com.example.st10298850_prog7313_p2_lp.databinding.ActivityMainBinding
+import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -18,26 +19,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Add these lines to drop and recreate the database
         database = AppDatabase.getDatabase(this)
 
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        database = AppDatabase.getDatabase(this)
-
         binding.loginButton.setOnClickListener {
             loginUser()
         }
 
-        // Set up click listener for the "Sign up" text
         binding.signUpTextView.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
-
-        // TODO: Implement login logic
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -65,11 +60,13 @@ class MainActivity : AppCompatActivity() {
                     val streak = if (currentDate - user.lastLoginDate < dayInMillis) user.loginStreak + 1 else 1
                     database.userDao().updateLoginStreak(user.userId, streak, currentDate)
 
+                    // Save user ID in SharedPreferences
+                    UserSessionManager.saveUserId(this@MainActivity, user.userId)
+
                     Toast.makeText(this@MainActivity, "Login successful", Toast.LENGTH_SHORT).show()
                     
                     // Navigate to the HomeActivity
                     val intent = Intent(this@MainActivity, HomeActivity::class.java)
-                    intent.putExtra("USER_ID", user.userId)
                     startActivity(intent)
                     finish() // Close the MainActivity so the user can't go back to it
                 } else {

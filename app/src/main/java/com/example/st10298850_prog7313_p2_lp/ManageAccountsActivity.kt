@@ -1,10 +1,9 @@
 package com.example.st10298850_prog7313_p2_lp
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.Window
-import android.widget.Button
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +12,7 @@ import com.example.st10298850_prog7313_p2_lp.data.Account
 import com.example.st10298850_prog7313_p2_lp.data.AppDatabase
 import com.example.st10298850_prog7313_p2_lp.databinding.ActivityManageAccountsBinding
 import com.example.st10298850_prog7313_p2_lp.databinding.DialogEditAccountBinding
+import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
 class ManageAccountsActivity : AppCompatActivity() {
@@ -26,10 +26,19 @@ class ManageAccountsActivity : AppCompatActivity() {
         binding = ActivityManageAccountsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userId = UserSessionManager.getUserId(this)
+        if (userId == -1L) {
+            // Handle user not logged in, redirect to login
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         database = AppDatabase.getDatabase(this)
         setupRecyclerView()
         setupClickListeners()
-        loadAccounts()
+        loadAccounts(userId)
     }
 
     private fun setupRecyclerView() {
@@ -54,9 +63,9 @@ class ManageAccountsActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadAccounts() {
+    private fun loadAccounts(userId: Long) {
         lifecycleScope.launch {
-            val accounts = database.accountDao().getAccountsForUser(1) // Assuming user ID 1 for now
+            val accounts = database.accountDao().getAccountsForUser(userId)
             accountAdapter.submitList(accounts)
         }
     }
@@ -74,7 +83,8 @@ class ManageAccountsActivity : AppCompatActivity() {
             val amount = dialogBinding.etAccountAmount.text.toString().toDoubleOrNull()
 
             if (name.isNotEmpty() && type.isNotEmpty() && amount != null) {
-                val newAccount = Account(userId = 1, name = name, type = type, goalAmount = amount)
+                val userId = UserSessionManager.getUserId(this)
+                val newAccount = Account(userId = userId, name = name, type = type, goalAmount = amount)
                 addAccount(newAccount)
                 dialog.dismiss()
             } else {
@@ -88,7 +98,7 @@ class ManageAccountsActivity : AppCompatActivity() {
     private fun addAccount(account: Account) {
         lifecycleScope.launch {
             database.accountDao().insertAccount(account)
-            loadAccounts() // Refresh the list
+            loadAccounts(account.userId) // Refresh the list with the correct userId
         }
     }
 }

@@ -61,7 +61,12 @@ dependencies {
     // Coroutines for Room
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    val lifecycleVersion = "2.5.1"  // Use the latest version
+    val lifecycleVersion = "2.6.1"  // Use the latest version
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation ("androidx.activity:activity-ktx:1.6.1")
+    implementation ("androidx.fragment:fragment-ktx:1.5.5")
+
+    implementation ("com.jakewharton.threetenabp:threetenabp:1.3.1")
+
 }
