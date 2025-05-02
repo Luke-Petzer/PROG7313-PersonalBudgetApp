@@ -17,7 +17,10 @@ import com.example.st10298850_prog7313_p2_lp.data.BudgetGoal
 import com.example.st10298850_prog7313_p2_lp.databinding.DialogBudgetGoalsBinding
 import com.example.st10298850_prog7313_p2_lp.data.AppDatabase
 import com.example.st10298850_prog7313_p2_lp.data.BudgetGoalRepository
+import com.example.st10298850_prog7313_p2_lp.data.CategoryTotal
 import com.example.st10298850_prog7313_p2_lp.viewmodels.HomeViewModelFactory
+import com.google.android.material.datepicker.MaterialDatePicker
+import java.text.SimpleDateFormat
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
@@ -45,6 +48,7 @@ class HomeActivity : AppCompatActivity() {
             setupRecyclerView()
             observeCategoryTotals()
             setupDateRangePicker()
+            viewModel.loadCategoryTotals() // Load all category totals when activity starts
             viewModel.loadBudgetGoals() // Load budget goals when activity starts
             observeBudgetGoals()
         }
@@ -82,6 +86,10 @@ class HomeActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+        binding.btnSelectDateRange.setOnClickListener {
+            showDateRangePicker()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -95,6 +103,7 @@ class HomeActivity : AppCompatActivity() {
     private fun observeCategoryTotals() {
         viewModel.categoryTotals.observe(this) { categoryTotals ->
             categoryTotalAdapter.submitList(categoryTotals)
+            updateTotalSpending(categoryTotals)
         }
     }
 
@@ -105,9 +114,21 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun showDateRangePicker() {
-        // Implement your date range picker dialog here
-        // After selecting the date range, call:
-        // viewModel.loadCategoryTotals(startDate, endDate)
+        val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText("Select Date Range")
+            .build()
+
+        dateRangePicker.addOnPositiveButtonClickListener { selection ->
+            val startDate = selection.first
+            val endDate = selection.second
+            viewModel.loadCategoryTotalsForDateRange(startDate, endDate)
+
+            // Update UI to show selected date range
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            binding.tvDateRange.text = "${dateFormat.format(Date(startDate))} - ${dateFormat.format(Date(endDate))}"
+        }
+
+        dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
     }
 
     private fun showBudgetGoalsDialog() {
@@ -142,5 +163,10 @@ class HomeActivity : AppCompatActivity() {
             binding.minGoalText.text = "Short Term Goal: R${shortTermGoal?.goalAmount ?: 0}"
             binding.maxGoalText.text = "Long Term Goal: R${longTermGoal?.goalAmount ?: 0}"
         }
+    }
+
+    private fun updateTotalSpending(categoryTotals: List<CategoryTotal>) {
+        val totalSpending = categoryTotals.sumOf { it.totalAmount }
+        binding.tvTotalSpending.text = "Total Spending: R%.2f".format(totalSpending)
     }
 }

@@ -42,17 +42,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loginUser() {
-        val email = binding.emailEditText.text.toString()
+        val username = binding.usernameEditText.text.toString()
         val password = binding.passwordEditText.text.toString()
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Email and password are required", Toast.LENGTH_SHORT).show()
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Username and password are required", Toast.LENGTH_SHORT).show()
             return
         }
 
         lifecycleScope.launch {
             try {
-                val user = database.userDao().getUserByEmailAndPassword(email, password)
+                val user = database.userDao().getUserByUsernameAndPassword(username, password)
                 if (user != null) {
                     // Update login streak
                     val currentDate = System.currentTimeMillis()
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish() // Close the MainActivity so the user can't go back to it
                 } else {
-                    Toast.makeText(this@MainActivity, "Invalid email or password", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Invalid username or password", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

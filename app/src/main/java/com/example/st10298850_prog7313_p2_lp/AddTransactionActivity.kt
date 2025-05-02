@@ -40,29 +40,24 @@ import java.util.*
 import android.widget.EditText
 import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
+// Add this import at the top of the file
+import com.example.st10298850_prog7313_p2_lp.utils.ImagePreviewUtil
 
 class AddTransactionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddTransactionBinding
     private lateinit var viewModel: AddTransactionViewModel
     private var receiptImageUri: Uri? = null
-    private lateinit var cameraLauncher: ActivityResultLauncher<Uri>
-
     private lateinit var photoUploadImage: ImageView
     private var currentPhotoPath: String = ""
     private var photoUri: Uri? = null
+    private var currentReceiptPath: String? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        permissions.entries.forEach { entry ->
-            Log.d("Permissions", "${entry.key} is ${if (entry.value) "granted" else "denied"}")
-        }
-        val allGranted = permissions.entries.all { it.value }
-        if (allGranted) {
-            Log.d("Permissions", "All permissions granted, showing image source dialog")
+        if (permissions.all { it.value }) {
             showImageSourceDialog()
         } else {
-            Log.d("Permissions", "Some permissions were denied")
             Toast.makeText(this, "Permissions required to upload receipt", Toast.LENGTH_SHORT).show()
         }
     }
@@ -89,35 +84,24 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
-//    private lateinit var repeatIntervalAdapter: ArrayAdapter<String>
-//    private val repeatIntervals = listOf("Daily", "Weekly", "Monthly", "Yearly")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnClose.setOnClickListener {
-            finish() // This will close the current activity and return to the previous one
-        }
-        photoUploadImage = binding.receiptImage
-
-
-        photoUploadImage.setOnClickListener {
-            checkPermissionsAndShowOptions()
-        }
-
+        setupUI()
         setupViewModel()
         setupDropdowns()
         setupDatePickers()
-//        setupRepeatToggle()
         setupTabLayoutListener()
+        setupReceiptPreview()
+    }
 
-//        setupRepeatFunctionality()
-
-        binding.btnAddTransaction.setOnClickListener {
-            addTransaction()
-        }
+    private fun setupUI() {
+        binding.btnClose.setOnClickListener { finish() }
+        photoUploadImage = binding.receiptImage
+        photoUploadImage.setOnClickListener { checkPermissionsAndShowOptions() }
+        binding.btnAddTransaction.setOnClickListener { addTransaction() }
     }
 
     private fun setupViewModel() {
@@ -135,8 +119,6 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun setupDropdowns() {
         viewModel.categories.observe(this) { categories ->
-            Log.d("AddTransactionActivity", "Observed ${categories.size} categories")
-            Log.d("AddTransactionActivity", "Category names: ${categories.map { it.name }}")
             if (categories.isEmpty()) {
                 lifecycleScope.launch {
                     viewModel.insertDefaultCategories(getCurrentUserId())
@@ -146,15 +128,11 @@ class AddTransactionActivity : AppCompatActivity() {
                 val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories.map { it.name })
                 binding.etCategory.setAdapter(adapter)
                 binding.etCategory.threshold = 1
-                binding.etCategory.setOnClickListener {
-                    binding.etCategory.showDropDown()
-                }
+                binding.etCategory.setOnClickListener { binding.etCategory.showDropDown() }
             }
         }
 
         viewModel.accounts.observe(this) { accounts ->
-            Log.d("AddTransactionActivity", "Observed ${accounts.size} accounts")
-            Log.d("AddTransactionActivity", "Account names: ${accounts.map { it.name }}")
             if (accounts.isEmpty()) {
                 lifecycleScope.launch {
                     viewModel.loadAccountsForUser(getCurrentUserId())
@@ -163,9 +141,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, accounts.map { it.name })
                 binding.etAccount.setAdapter(adapter)
                 binding.etAccount.threshold = 1
-                binding.etAccount.setOnClickListener {
-                    binding.etAccount.showDropDown()
-                }
+                binding.etAccount.setOnClickListener { binding.etAccount.showDropDown() }
             }
         }
     }
@@ -173,28 +149,20 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun setupDatePickers() {
         val calendar = Calendar.getInstance()
 
-        val startDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            binding.etStartDate.setText(dateFormat.format(calendar.time))
-        }
-
-        val endDateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            binding.etEndDate.setText(dateFormat.format(calendar.time))
+        val dateSetListener = { field: EditText ->
+            DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                field.setText(dateFormat.format(calendar.time))
+            }
         }
 
         binding.etStartDate.setOnClickListener {
             DatePickerDialog(
                 this@AddTransactionActivity,
-                startDateSetListener,
+                dateSetListener(binding.etStartDate),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -204,7 +172,7 @@ class AddTransactionActivity : AppCompatActivity() {
         binding.etEndDate.setOnClickListener {
             DatePickerDialog(
                 this@AddTransactionActivity,
-                endDateSetListener,
+                dateSetListener(binding.etEndDate),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -212,39 +180,51 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
-//    private fun setupRepeatToggle() {
-//        // Implementation as before
-//    }
-
     private fun setupTabLayoutListener() {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> {
-                        // Expense selected
-                        // Update UI or viewModel as needed
-                    }
-                    1 -> {
-                        // Income selected
-                        // Update UI or viewModel as needed
-                    }
-                }
+                // Update UI or viewModel as needed based on selected tab
             }
-
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
 
+private fun setupReceiptPreview() {
+    photoUploadImage.setOnClickListener {
+        if (currentReceiptPath != null) {
+            ImagePreviewUtil.showImagePreviewDialog(this, currentReceiptPath!!)
+        } else {
+            showImageOptions()
+        }
+    }
+}
+
+
+    private fun showImageOptions() {
+        val options = arrayOf("Take Photo", "Choose from Gallery")
+        AlertDialog.Builder(this)
+            .setTitle("Attach Receipt")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> takePhoto()
+                    1 -> chooseFromGallery()
+                }
+            }
+            .show()
+    }
+
     private fun addTransaction() {
         val amountText = binding.tvAmount.text.toString()
         val amount = amountText.toDoubleOrNull()
-
         val category = binding.etCategory.text.toString()
         val account = binding.etAccount.text.toString()
         val description = binding.etDescription.text.toString()
         val startDateStr = binding.etStartDate.text.toString()
         val endDateStr = binding.etEndDate.text.toString()
+        val receiptPath = currentReceiptPath ?: receiptImageUri?.toString()
+        Log.d(TAG, "Saving transaction with receipt path: $receiptPath")
+
 
         if (amount == null || amount <= 0 || category.isEmpty() || account.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields with valid values.", Toast.LENGTH_SHORT).show()
@@ -254,7 +234,6 @@ class AddTransactionActivity : AppCompatActivity() {
         val startDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(startDateStr)?.time ?: return
         val endDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(endDateStr)?.time ?: return
 
-        // Find the selected account ID
         val selectedAccount = viewModel.accounts.value?.find { it.name == account }
         val accountId = selectedAccount?.accountId ?: return
 
@@ -266,91 +245,25 @@ class AddTransactionActivity : AppCompatActivity() {
             startDate = startDate,
             endDate = endDate,
             description = description,
-            receiptPath = receiptImageUri?.toString(),
-            // Comment out or remove these lines
-            // repeat = binding.switchRepeat.isChecked,
-            // repeatInterval = repeatInterval,
-            // repeatUntil = repeatUntil,
-            // repeatCount = repeatCount,
+            receiptPath = currentReceiptPath,
             category = category
         )
 
-        viewModel.addTransaction(transaction)
-        Toast.makeText(this, "Transaction added successfully", Toast.LENGTH_SHORT).show()
+viewModel.addTransaction(transaction)
+Log.d("AddTransaction", "Saved transaction with receipt path: ${transaction.receiptPath}")
+Toast.makeText(this, "Transaction added successfully", Toast.LENGTH_SHORT).show()
+finish()
         finish()
     }
 
-//    private fun addTransaction() {
-//        val amountText = binding.tvAmount.text.toString()
-//        val amount = amountText.toDoubleOrNull()
-//
-//        val category = binding.etCategory.text.toString()
-//        val account = binding.etAccount.text.toString()
-//        val description = binding.etDescription.text.toString()
-//        val dateStr = binding.etDate.text.toString()
-//
-//        if (amount == null || amount <= 0 || category.isEmpty() || account.isEmpty() || dateStr.isEmpty()) {
-//            Toast.makeText(this, "Please fill in all required fields with valid values.", Toast.LENGTH_SHORT).show()
-//            return
-//        }
-//
-//        val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)?.time ?: return
-//
-//        // Find the selected account ID
-//        val selectedAccount = viewModel.accounts.value?.find { it.name == account }
-//        val accountId = selectedAccount?.accountId ?: return
-//
-//        val repeatInterval = if (binding.switchRepeat.isChecked) {
-//            when (binding.spinnerRepeatInterval.selectedItem as String) {
-//                "Daily" -> "D"
-//                "Weekly" -> "W"
-//                "Monthly" -> "M"
-//                "Yearly" -> "Y"
-//                else -> null
-//            }
-//        } else null
-//
-//        val repeatUntil = if (binding.switchRepeat.isChecked && binding.etRepeatUntil.text?.isNotEmpty() == true) {
-//            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(binding.etRepeatUntil.text.toString())?.time
-//        } else null
-//
-//        val repeatCount = if (binding.switchRepeat.isChecked && binding.etRepeatCount.text?.isNotEmpty() == true) {
-//            binding.etRepeatCount.text.toString().toIntOrNull()
-//        } else null
-//
-//        val transaction = Transaction(
-//            userId = getCurrentUserId(),
-//            type = if (binding.tabLayout.selectedTabPosition == 0) "Expense" else "Income",
-//            amount = amount,
-//            accountId = accountId,
-//            date = date,
-//            description = description,
-//            receiptPath = receiptImageUri?.toString(),
-////            repeat = binding.switchRepeat.isChecked,
-////            repeatInterval = repeatInterval,
-////            repeatUntil = repeatUntil,
-////            repeatCount = repeatCount,
-//            category = category
-//        )
-//
-//        viewModel.addTransaction(transaction)
-//        Toast.makeText(this, "Transaction added successfully", Toast.LENGTH_SHORT).show()
-//        finish()
-//    }
-
-private fun getCurrentUserId(): Long {
-    val userId = UserSessionManager.getUserId(this)
-
-    if (userId == -1L) {
-        // Handle user not logged in, e.g., redirect to login
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-        return -1L // Return a default value
+    private fun getCurrentUserId(): Long {
+        val userId = UserSessionManager.getUserId(this)
+        if (userId == -1L) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+        return userId
     }
-    return userId
-}
-
 
     private fun checkPermissionsAndShowOptions() {
         val permissionsToRequest = mutableListOf<String>()
@@ -370,15 +283,9 @@ private fun getCurrentUserId(): Long {
         }
 
         when {
-            permissionsToRequest.isEmpty() -> {
-                showImageSourceDialog()
-            }
-            permissionsToRequest.any { shouldShowRequestPermissionRationale(it) } -> {
-                showPermissionRationaleDialog(permissionsToRequest.toTypedArray())
-            }
-            else -> {
-                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
-            }
+            permissionsToRequest.isEmpty() -> showImageSourceDialog()
+            permissionsToRequest.any { shouldShowRequestPermissionRationale(it) } -> showPermissionRationaleDialog(permissionsToRequest.toTypedArray())
+            else -> requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
@@ -386,9 +293,7 @@ private fun getCurrentUserId(): Long {
         AlertDialog.Builder(this)
             .setTitle("Permission Required")
             .setMessage("This app needs access to your camera and storage to take and save photos. Please grant these permissions to continue.")
-            .setPositiveButton("OK") { _, _ ->
-                requestPermissionLauncher.launch(permissions)
-            }
+            .setPositiveButton("OK") { _, _ -> requestPermissionLauncher.launch(permissions) }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
                 Toast.makeText(this, "Permissions are required to upload a receipt", Toast.LENGTH_SHORT).show()
@@ -398,7 +303,6 @@ private fun getCurrentUserId(): Long {
 
     private fun showImageSourceDialog() {
         val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
-
         AlertDialog.Builder(this)
             .setTitle("Upload Receipt")
             .setItems(options) { dialog, which ->
@@ -411,24 +315,35 @@ private fun getCurrentUserId(): Long {
             .show()
     }
 
-    private fun takePhoto() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val photoFile: File? = try {
-            createImageFile()
-        } catch (ex: IOException) {
-            Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show()
-            null
-        }
+private fun takePhoto() {
+    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    val photoFile: File? = try {
+        createImageFile()
+    } catch (ex: IOException) {
+        Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show()
+        null
+    }
 
-        photoFile?.also {
-            photoUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                it
-            )
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            takePictureLauncher.launch(takePictureIntent)
+    photoFile?.also {
+        photoUri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            it
+        )
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        takePictureLauncher.launch(takePictureIntent)
+
+        // After launching the camera intent, add these lines:
+        Log.d("ImageSave", "Image should be saved to: ${it.absolutePath}")
+        // Check if file exists immediately after saving
+        if (it.exists()) {
+            Log.d("ImageSave", "File exists after saving")
+            currentReceiptPath = it.absolutePath
+        } else {
+            Log.e("ImageSave", "File does not exist after saving")
         }
+    }
+
     }
 
     private fun chooseFromGallery() {
@@ -445,7 +360,10 @@ private fun getCurrentUserId(): Long {
         }
     }
 
-    fun getPhotoUri(): Uri? = photoUri
+    companion object {
+        private const val TAG = "AddTransactionActivity"
+    }
+}
 
 //    private fun setupRepeatFunctionality() {
 //        // Setup repeat switch
@@ -499,4 +417,3 @@ private fun getCurrentUserId(): Long {
 //
 //    datePickerDialog.show()
 //}
-}

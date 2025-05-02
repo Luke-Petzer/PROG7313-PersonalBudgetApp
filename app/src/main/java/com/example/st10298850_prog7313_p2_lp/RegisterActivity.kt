@@ -32,26 +32,27 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun registerUser() {
         val name = binding.nameEditText.text.toString()
+        val username = binding.usernameEditText.text.toString()
         val email = binding.emailEditText.text.toString()
         val password = binding.passwordEditText.text.toString()
 
-        if (validateInput(name, email, password)) {
+        if (validateInput(name, username, email, password)) {
             lifecycleScope.launch {
-                val existingUser = database.userDao().getUserByEmail(email)
+                val existingUser = database.userDao().getUserByUsername(username)
                 if (existingUser == null) {
-                    val newUser = User(name = name, email = email, password = password)
+                    val newUser = User(name = name, username = username, email = email, password = password)
                     database.userDao().insertUser(newUser)
                     Toast.makeText(this@RegisterActivity, "Registration successful", Toast.LENGTH_SHORT).show()
                     finish() // Go back to login screen
                 } else {
-                    Toast.makeText(this@RegisterActivity, "Email already exists", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RegisterActivity, "Username already exists", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private fun validateInput(name: String, email: String, password: String): Boolean {
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+    private fun validateInput(name: String, username: String, email: String, password: String): Boolean {
+        if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
             return false
         }

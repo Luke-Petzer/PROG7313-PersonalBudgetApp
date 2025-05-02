@@ -13,7 +13,10 @@ import com.example.st10298850_prog7313_p2_lp.repositories.TransactionRepository
 import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
-class HomeViewModel(application: Application, private val budgetGoalRepository: BudgetGoalRepository) : AndroidViewModel(application) {
+class HomeViewModel(
+    application: Application,
+    private val budgetGoalRepository: BudgetGoalRepository
+) : AndroidViewModel(application) {
     private val repository: TransactionRepository
     private val userId: Long
 
@@ -24,15 +27,22 @@ class HomeViewModel(application: Application, private val budgetGoalRepository: 
     val budgetGoals: LiveData<List<BudgetGoal>> = _budgetGoals
 
     init {
-        val transactionDao = AppDatabase.getDatabase(application).transactionDao()
-        repository = TransactionRepository(transactionDao)
+        val database = AppDatabase.getDatabase(application)
+        repository = TransactionRepository(database.transactionDao())
         userId = UserSessionManager.getUserId(application)
+        loadCategoryTotals()
+        loadBudgetGoals()
     }
 
-    fun loadCategoryTotals(startDate: Long, endDate: Long) {
+    fun loadCategoryTotals() {
         viewModelScope.launch {
-            val totals = repository.getCategoryTotalsForUserInDateRange(userId, startDate, endDate)
-            _categoryTotals.value = totals
+            _categoryTotals.value = repository.getCategoryTotalsForUser(userId)
+        }
+    }
+
+    fun loadCategoryTotalsForDateRange(startDate: Long, endDate: Long) {
+        viewModelScope.launch {
+            _categoryTotals.value = repository.getCategoryTotalsForUserInDateRange(userId, startDate, endDate)
         }
     }
 

@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [User::class, Transaction::class, Account::class, BudgetGoal::class, Category::class, MonthlyGoal::class],
-    version = 6, // Increment the version number
+    version = 7, // Increment the version number
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -59,7 +59,8 @@ abstract class AppDatabase : RoomDatabase() {
                 val initialUser = User(
                     email = "admin@gmail.com",
                     password = "Admin123$",
-                    name = "Admin"
+                    name = "Admin",
+                    username = "admin"
                 )
                 userDao.insertUser(initialUser)
             }

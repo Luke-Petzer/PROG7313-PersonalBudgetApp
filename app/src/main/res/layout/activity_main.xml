@@ -63,14 +63,14 @@
                 android:textSize="14sp" />
 
             <EditText
-                android:id="@+id/emailEditText"
+                android:id="@+id/usernameEditText"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="42dp"
                 android:layout_marginTop="8dp"
-                android:drawableStart="@drawable/mail_ic"
+                android:drawableStart="@drawable/person_ic"
                 android:drawablePadding="12dp"
-                android:hint="Enter your email"
-                android:inputType="textEmailAddress"
+                android:hint="Enter your username"
+                android:inputType="text"
                 android:paddingStart="12dp"
                 android:textColorHint="#ADAEBC" />
 
