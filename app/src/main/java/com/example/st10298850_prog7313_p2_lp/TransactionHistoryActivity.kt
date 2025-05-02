@@ -55,6 +55,11 @@ class TransactionHistoryActivity : AppCompatActivity() {
         observeTransactions()
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d("ImagePopup", "Glide load started")
+    }
+
     private fun setupViewModel(userId: Long) {
         val factory = TransactionHistoryViewModelFactory(application, userId)
         viewModel = ViewModelProvider(this, factory)[TransactionHistoryViewModel::class.java]
@@ -245,7 +250,44 @@ class TransactionHistoryActivity : AppCompatActivity() {
                     return false
                 }
             })
-            .into(imageView)
+            .into(object : com.bumptech.glide.request.target.Target<Drawable> {
+                override fun onStart() {
+                    Log.d("ImagePopup", "Glide load started")
+                }
+
+                override fun onStop() {
+                    Log.d("ImagePopup", "Glide load stopped")
+                }
+
+                override fun onDestroy() {
+                    Log.d("ImagePopup", "Glide target destroyed")
+                }
+
+                override fun onLoadStarted(placeholder: Drawable?) {
+                    Log.d("ImagePopup", "Glide load started with placeholder")
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    Log.e("ImagePopup", "Glide load failed")
+                }
+
+                override fun onResourceReady(resource: Drawable, transition: com.bumptech.glide.request.transition.Transition<in Drawable>?) {
+                    Log.d("ImagePopup", "Glide resource ready")
+                    imageView.setImageDrawable(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    Log.d("ImagePopup", "Glide load cleared")
+                }
+
+                override fun getSize(cb: com.bumptech.glide.request.target.SizeReadyCallback) {
+                    cb.onSizeReady(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL, com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
+                }
+
+                override fun removeCallback(cb: com.bumptech.glide.request.target.SizeReadyCallback) {}
+                override fun setRequest(request: com.bumptech.glide.request.Request?) {}
+                override fun getRequest(): com.bumptech.glide.request.Request? = null
+            })
 
         dialog.show()
         Log.d("ImagePopup", "Dialog shown")
