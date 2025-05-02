@@ -11,7 +11,6 @@ import com.example.st10298850_prog7313_p2_lp.databinding.ActivityTransactionHist
 import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
-import java.util.*
 import com.example.st10298850_prog7313_p2_lp.viewmodels.TransactionHistoryViewModelFactory
 import android.app.Dialog
 import android.view.Window
@@ -22,29 +21,32 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.widget.Toast
-import com.example.st10298850_prog7313_p2_lp.utils.ImagePreviewUtil
-import com.example.st10298850_prog7313_p2_lp.data.Transaction
-import com.example.st10298850_prog7313_p2_lp.TransactionAdapter
 import java.io.File
 import androidx.core.content.FileProvider
 
+/**
+ * Activity for displaying and managing transaction history.
+ * This activity allows users to view their transactions, filter them by date and category,
+ * and view receipt images associated with transactions.
+ */
 class TransactionHistoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTransactionHistoryBinding
     private lateinit var viewModel: TransactionHistoryViewModel
     private lateinit var transactionAdapter: TransactionAdapter
 
+    /**
+     * Initializes the activity, sets up the UI, and checks for user authentication.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTransactionHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Check if user is logged in, redirect to login if not
         val userId = UserSessionManager.getUserId(this)
         if (userId == -1L) {
-            // Handle user not logged in, redirect to login
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
@@ -55,16 +57,27 @@ class TransactionHistoryActivity : AppCompatActivity() {
         observeTransactions()
     }
 
+    /**
+     * Logs the start of the activity for debugging purposes.
+     */
     override fun onStart() {
         super.onStart()
         Log.d("ImagePopup", "Glide load started")
     }
 
+    /**
+     * Sets up the ViewModel for this activity.
+     * @param userId The ID of the currently logged-in user.
+     */
     private fun setupViewModel(userId: Long) {
         val factory = TransactionHistoryViewModelFactory(application, userId)
         viewModel = ViewModelProvider(this, factory)[TransactionHistoryViewModel::class.java]
     }
 
+    /**
+     * Sets up the RecyclerView to display transactions.
+     * Configures the adapter and sets up a click listener for viewing receipt images.
+     */
     private fun setupRecyclerView() {
         transactionAdapter = TransactionAdapter { transaction ->
             if (!transaction.receiptPath.isNullOrEmpty()) {
@@ -77,12 +90,17 @@ class TransactionHistoryActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@TransactionHistoryActivity)
         }
 
+        // Observe changes in filtered transactions and update the adapter
         viewModel.filteredTransactions.observe(this) { transactions ->
             transactionAdapter.submitList(transactions)
         }
     }
 
+    /**
+     * Sets up the UI components including toolbar, bottom navigation, date filter, and category chips.
+     */
     private fun setupUI() {
+        // Setup toolbar
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -91,6 +109,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
         setupDateFilter()
         setupCategoryChips()
 
+        // Setup click listeners for various UI elements
         binding.btnNotification.setOnClickListener {
             // TODO: Handle notification click
         }
@@ -104,38 +123,26 @@ class TransactionHistoryActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up the bottom navigation menu.
+     */
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> startActivity(Intent(this, HomeActivity::class.java))
                 R.id.navigation_stats -> startActivity(Intent(this, StatsActivity::class.java))
-                R.id.navigation_add -> startActivity(
-                    Intent(
-                        this,
-                        AddTransactionActivity::class.java
-                    )
-                )
-
-                R.id.navigation_budget -> startActivity(
-                    Intent(
-                        this,
-                        TransactionHistoryActivity::class.java
-                    )
-                )
-
-                R.id.navigation_settings -> startActivity(
-                    Intent(
-                        this,
-                        SettingsActivity::class.java
-                    )
-                )
-
+                R.id.navigation_add -> startActivity(Intent(this, AddTransactionActivity::class.java))
+                R.id.navigation_budget -> startActivity(Intent(this, TransactionHistoryActivity::class.java))
+                R.id.navigation_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                 else -> return@setOnItemSelectedListener false
             }
             true
         }
     }
 
+    /**
+     * Sets up the date filter chip for filtering transactions by the current month.
+     */
     private fun setupDateFilter() {
         binding.chipThisMonth.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -146,6 +153,9 @@ class TransactionHistoryActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up category chips for filtering transactions by category.
+     */
     private fun setupCategoryChips() {
         viewModel.categories.observe(this) { categories ->
             binding.chipGroupCategories.removeAllViews()
@@ -169,6 +179,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
                 binding.chipGroupCategories.addView(chip)
             }
 
+            // Set up listener for category selection
             binding.chipGroupCategories.setOnCheckedChangeListener { _, checkedId ->
                 val selectedChip = binding.chipGroupCategories.findViewById<Chip>(checkedId)
                 val selectedCategory = selectedChip?.text?.toString()
@@ -177,6 +188,9 @@ class TransactionHistoryActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Shows a date range picker dialog for selecting a custom date range.
+     */
     private fun showDateRangePicker() {
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select date range")
@@ -192,12 +206,19 @@ class TransactionHistoryActivity : AppCompatActivity() {
         dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
     }
 
+    /**
+     * Observes changes in filtered transactions and updates the UI accordingly.
+     */
     private fun observeTransactions() {
         viewModel.filteredTransactions.observe(this) { transactions ->
             transactionAdapter.submitList(transactions)
         }
     }
 
+    /**
+     * Shows a popup dialog displaying the receipt image for a transaction.
+     * @param receiptPath The file path of the receipt image.
+     */
     private fun showImagePopup(receiptPath: String) {
         Log.d("ImagePopup", "Attempting to show image from path: $receiptPath")
 
@@ -222,6 +243,7 @@ class TransactionHistoryActivity : AppCompatActivity() {
 
         Log.d("ImagePopup", "Created URI: $uri")
 
+        // Load the image using Glide
         Glide.with(this)
             .load(uri)
             .listener(object : RequestListener<Drawable> {

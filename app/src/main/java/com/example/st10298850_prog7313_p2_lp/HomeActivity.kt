@@ -22,9 +22,15 @@ import com.example.st10298850_prog7313_p2_lp.viewmodels.HomeViewModelFactory
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 
+
+/**
+ * HomeActivity is the main screen of the application.
+ * It displays category totals, budget goals, and provides navigation to other features.
+ */
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var categoryTotalAdapter: CategoryTotalAdapter
+    // ViewModel initialization using viewModels delegate
     private val viewModel: HomeViewModel by viewModels {
         HomeViewModelFactory(
             application,
@@ -37,6 +43,7 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Check if user is logged in, redirect to login if not
         val userId = UserSessionManager.getUserId(this)
         if (userId == -1L) {
             // Handle user not logged in, e.g., redirect to login
@@ -53,12 +60,10 @@ class HomeActivity : AppCompatActivity() {
             observeBudgetGoals()
         }
     }
-
+    /**
+     * Sets up the UI components including bottom navigation and click listeners.
+     */
     private fun setupUI() {
-        // Set current date
-        // You can add code here to set the current date if needed
-
-        // Change this line to use the correct button
         binding.setGoalsButton.setOnClickListener {
             showBudgetGoalsDialog()
         }
@@ -91,7 +96,9 @@ class HomeActivity : AppCompatActivity() {
             showDateRangePicker()
         }
     }
-
+    /**
+     * Sets up the RecyclerView for displaying category totals.
+     */
     private fun setupRecyclerView() {
         categoryTotalAdapter = CategoryTotalAdapter()
         binding.rvCategoryTotals.apply {
@@ -99,20 +106,26 @@ class HomeActivity : AppCompatActivity() {
             adapter = categoryTotalAdapter
         }
     }
-
+    /**
+     * Observes changes in category totals and updates the UI accordingly.
+     */
     private fun observeCategoryTotals() {
         viewModel.categoryTotals.observe(this) { categoryTotals ->
             categoryTotalAdapter.submitList(categoryTotals)
             updateTotalSpending(categoryTotals)
         }
     }
-
+    /**
+     * Sets up the date range picker functionality.
+     */
     private fun setupDateRangePicker() {
         binding.btnSelectDateRange.setOnClickListener {
             showDateRangePicker()
         }
     }
-
+    /**
+     * Shows the date range picker dialog and handles the selected date range.
+     */
     private fun showDateRangePicker() {
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select Date Range")
@@ -130,7 +143,9 @@ class HomeActivity : AppCompatActivity() {
 
         dateRangePicker.show(supportFragmentManager, "DATE_RANGE_PICKER")
     }
-
+    /**
+     * Shows a dialog for setting budget goals.
+     */
     private fun showBudgetGoalsDialog() {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -154,7 +169,9 @@ class HomeActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
+    /**
+     * Observes changes in budget goals and updates the UI accordingly.
+     */
     private fun observeBudgetGoals() {
         viewModel.budgetGoals.observe(this) { goals ->
             val shortTermGoal = goals.find { it.name == "Short Term Goal" }
@@ -164,7 +181,9 @@ class HomeActivity : AppCompatActivity() {
             binding.maxGoalText.text = "Long Term Goal: R${longTermGoal?.goalAmount ?: 0}"
         }
     }
-
+    /**
+     * Updates the total spending display based on category totals.
+     */
     private fun updateTotalSpending(categoryTotals: List<CategoryTotal>) {
         val totalSpending = categoryTotals.sumOf { it.totalAmount }
         binding.tvTotalSpending.text = "Total Spending: R%.2f".format(totalSpending)

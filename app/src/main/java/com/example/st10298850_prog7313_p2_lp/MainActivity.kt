@@ -101,3 +101,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+//--------------------------------------REFERENCES----------------------------------------
+//1.	Android Developers. (n.d.). Activities – Overview of activity lifecycle and usage.
+//•	Source: Android Developers (developer.android.com) - https://developer.android.com/guide/components/activities/intro
+//2.	Android Developers. (n.d.). View Binding – Efficient way to access views in code.
+//•	Source: Android Developers - https://developer.android.com/topic/binding/view-binding
+//3.	Google. (n.d.). Jetpack Navigation Component – Handling in-app navigation and fragments.
+//•	Source: Android Developers - https://developer.android.com/guide/navigation/navigation-getting-started
+//4.	Android Developers. (n.d.). Saved Instance State – Preserving UI state during configuration changes.
+//•	Source: Android Developers - https://developer.android.com/topic/libraries/architecture/saving-state
+//5.	Google. (n.d.). Room Persistence Library – Database interaction in Android apps.
+//8.	MindOrks. (2023). Android Activity Lifecycle Explained – Deep dive into lifecycle callbacks and best practices.
+//•	Source: MindOrks Blog - https://medium.com/mindorks/android-activity-lifecycle-explained-4265754e2584
+//9.	Medium. (2022). Understanding ViewModels in Android – Using ViewModels to retain UI-related data.
+//•	Source: Android Developers on Medium - https://stackoverflow.com/questions/59855621/understanding-viewmodels-in-android
+//10.	Stack Overflow. (varied years). Threads on common MainActivity issues, such as navigation crashes, null pointer exceptions in binding, or lifecycle bugs.
+//•	Example search: “NullPointerException in MainActivity Android Kotlin site:stackoverflow.com”
+//--------------------------------------------------------------------------------------

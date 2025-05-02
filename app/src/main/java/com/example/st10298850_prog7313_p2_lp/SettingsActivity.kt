@@ -7,6 +7,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.content.Intent
 
+/**
+ * SettingsActivity provides user interface for app settings and navigation to other activities.
+ */
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
 
@@ -19,8 +22,11 @@ class SettingsActivity : AppCompatActivity() {
         setupClickListeners()
     }
 
+    /**
+     * Sets up the user interface components, including the bottom navigation.
+     */
     private fun setupUI() {
-        // Set current date
+        // TODO: Set current date if needed
 
         // Setup bottom navigation
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -42,7 +48,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 R.id.navigation_settings -> {
-                    // Already on settings, do nothing or refresh
+                    // Already on settings, do nothing
                     true
                 }
                 else -> false
@@ -50,21 +56,22 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up click listeners for various settings options.
+     */
     private fun setupClickListeners() {
+        // Navigate to ManageCategoriesActivity when Transaction Categories button is clicked
         binding.btnTransactionCategories.setOnClickListener {
             val intent = Intent(this, ManageCategoriesActivity::class.java)
             startActivity(intent)
         }
+
+        // Navigate to ManageAccountsActivity when Manage Accounts button is clicked
         binding.btnManageAccounts.setOnClickListener {
             val intent = Intent(this, ManageAccountsActivity::class.java)
             startActivity(intent)
         }
 
-        // Add other click listeners here as needed
+        // TODO: Add more click listeners for other settings options
     }
-//    This is for the logout functionality
-//    UserSessionManager.clearSession(this)
-//    val intent = Intent(this, MainActivity::class.java)
-//    startActivity(intent)
-//    finish()
 }

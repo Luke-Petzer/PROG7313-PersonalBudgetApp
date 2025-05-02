@@ -52,6 +52,10 @@ class AddTransactionActivity : AppCompatActivity() {
     private var photoUri: Uri? = null
     private var currentReceiptPath: String? = null
 
+    /**
+     * Permission request launcher for camera and storage access.
+     * Handles the result of permission requests.
+     */
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -61,7 +65,10 @@ class AddTransactionActivity : AppCompatActivity() {
             Toast.makeText(this, "Permissions required to upload receipt", Toast.LENGTH_SHORT).show()
         }
     }
-
+    /**
+     * Activity result launcher for taking a picture.
+     * Handles the result of camera capture intent.
+     */
     private val takePictureLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -70,7 +77,10 @@ class AddTransactionActivity : AppCompatActivity() {
             receiptImageUri = photoUri
         }
     }
-
+    /**
+     * Activity result launcher for picking an image from gallery.
+     * Handles the result of gallery selection intent.
+     */
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -96,14 +106,18 @@ class AddTransactionActivity : AppCompatActivity() {
         setupTabLayoutListener()
         setupReceiptPreview()
     }
-
+    /**
+     * Sets up basic UI components and click listeners.
+     */
     private fun setupUI() {
         binding.btnClose.setOnClickListener { finish() }
         photoUploadImage = binding.receiptImage
         photoUploadImage.setOnClickListener { checkPermissionsAndShowOptions() }
         binding.btnAddTransaction.setOnClickListener { addTransaction() }
     }
-
+    /**
+     * Initializes the ViewModel and loads necessary data.
+     */
     private fun setupViewModel() {
         val database = AppDatabase.getDatabase(applicationContext)
         val transactionRepository = TransactionRepository(database.transactionDao())
@@ -116,7 +130,10 @@ class AddTransactionActivity : AppCompatActivity() {
         viewModel.loadCategoriesForUser(currentUserId)
         viewModel.loadAccountsForUser(currentUserId)
     }
-
+    /**
+     * Sets up dropdown menus for categories and accounts.
+     * Populates dropdowns with user-specific data.
+     */
     private fun setupDropdowns() {
         viewModel.categories.observe(this) { categories ->
             if (categories.isEmpty()) {
@@ -145,7 +162,9 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
     }
-
+    /**
+     * Sets up date pickers for start and end dates.
+     */
     private fun setupDatePickers() {
         val calendar = Calendar.getInstance()
 
@@ -179,7 +198,9 @@ class AddTransactionActivity : AppCompatActivity() {
             ).show()
         }
     }
-
+    /**
+     * Sets up tab layout listener for expense/income selection.
+     */
     private fun setupTabLayoutListener() {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -189,7 +210,9 @@ class AddTransactionActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
-
+    /**
+     * Sets up receipt preview functionality.
+     */
 private fun setupReceiptPreview() {
     photoUploadImage.setOnClickListener {
         if (currentReceiptPath != null) {
@@ -200,7 +223,9 @@ private fun setupReceiptPreview() {
     }
 }
 
-
+    /**
+     * Shows options for attaching a receipt (take photo or choose from gallery).
+     */
     private fun showImageOptions() {
         val options = arrayOf("Take Photo", "Choose from Gallery")
         AlertDialog.Builder(this)
@@ -213,7 +238,10 @@ private fun setupReceiptPreview() {
             }
             .show()
     }
-
+    /**
+     * Adds a new transaction based on user input.
+     * Validates input and saves the transaction.
+     */
     private fun addTransaction() {
         val amountText = binding.tvAmount.text.toString()
         val amount = amountText.toDoubleOrNull()
@@ -255,7 +283,10 @@ Toast.makeText(this, "Transaction added successfully", Toast.LENGTH_SHORT).show(
 finish()
         finish()
     }
-
+    /**
+     * Retrieves the current user's ID.
+     * Redirects to login if user is not authenticated.
+     */
     private fun getCurrentUserId(): Long {
         val userId = UserSessionManager.getUserId(this)
         if (userId == -1L) {
@@ -264,7 +295,9 @@ finish()
         }
         return userId
     }
-
+    /**
+     * Shows a dialog explaining why permissions are needed.
+     */
     private fun checkPermissionsAndShowOptions() {
         val permissionsToRequest = mutableListOf<String>()
 
@@ -288,7 +321,9 @@ finish()
             else -> requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
-
+    /**
+     * Shows a dialog explaining why permissions are needed.
+     */
     private fun showPermissionRationaleDialog(permissions: Array<String>) {
         AlertDialog.Builder(this)
             .setTitle("Permission Required")
@@ -300,7 +335,9 @@ finish()
             }
             .show()
     }
-
+    /**
+     * Shows a dialog for selecting image source (camera or gallery).
+     */
     private fun showImageSourceDialog() {
         val options = arrayOf("Take Photo", "Choose from Gallery", "Cancel")
         AlertDialog.Builder(this)
@@ -314,7 +351,9 @@ finish()
             }
             .show()
     }
-
+    /**
+     * Launches the camera to take a photo for the receipt.
+     */
 private fun takePhoto() {
     val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
     val photoFile: File? = try {
@@ -345,12 +384,16 @@ private fun takePhoto() {
     }
 
     }
-
+    /**
+     * Launches the gallery to choose an existing photo for the receipt.
+     */
     private fun chooseFromGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         pickImageLauncher.launch(intent)
     }
-
+    /**
+     * Creates a file to store the captured image.
+     */
     @Throws(IOException::class)
     private fun createImageFile(): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())

@@ -15,6 +15,9 @@ import com.example.st10298850_prog7313_p2_lp.data.Category
 import com.example.st10298850_prog7313_p2_lp.utils.UserSessionManager
 import kotlinx.coroutines.launch
 
+/**
+ * ManageCategoriesActivity allows users to view, add, edit, and delete budget categories.
+ */
 class ManageCategoriesActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityManageCategoriesBinding
@@ -26,24 +29,24 @@ class ManageCategoriesActivity : AppCompatActivity() {
         binding = ActivityManageCategoriesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Check if user is logged in, redirect to login if not
         val userId = UserSessionManager.getUserId(this)
         if (userId == -1L) {
-            // User not logged in, redirect to login
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
+            redirectToLogin()
             return
         }
 
         database = AppDatabase.getDatabase(this)
 
         setupClickListeners()
-        
         setupRecyclerView()
         loadCategories(userId)
         updateTotalBudget(userId)
     }
 
+    /**
+     * Sets up click listeners for various UI elements.
+     */
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener {
             finish()
@@ -54,6 +57,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sets up the RecyclerView to display the list of categories.
+     */
     private fun setupRecyclerView() {
         categoryAdapter = CategoryAdapter(
             onEditClick = { category -> showEditCategoryDialog(category) },
@@ -65,6 +71,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Loads and displays categories for the given user ID.
+     */
     private fun loadCategories(userId: Long) {
         lifecycleScope.launch {
             val categories = database.categoryDao().getCategoriesForUser(userId)
@@ -72,6 +81,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Updates the total budget display for the given user ID.
+     */
     private fun updateTotalBudget(userId: Long) {
         lifecycleScope.launch {
             val totalBudget = database.categoryDao().getTotalBudgetForUser(userId) ?: 0.0
@@ -79,6 +91,10 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Displays a dialog for adding or editing a category.
+     * @param category The category to edit, or null if adding a new category.
+     */
     private fun showEditCategoryDialog(category: Category? = null) {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -94,6 +110,7 @@ class ManageCategoriesActivity : AppCompatActivity() {
 
         dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
         dialogBinding.btnSaveChanges.setOnClickListener {
+            // Validate and save category changes
             val name = dialogBinding.etCategoryName.text.toString()
             val amount = dialogBinding.etBudgetAmount.text.toString().toDoubleOrNull()
 
@@ -116,6 +133,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    /**
+     * Updates an existing category in the database and refreshes the UI.
+     */
     private fun updateCategory(category: Category) {
         val userId = UserSessionManager.getUserId(this)
         lifecycleScope.launch {
@@ -125,6 +145,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Deletes a category from the database and refreshes the UI.
+     */
     private fun deleteCategory(category: Category) {
         val userId = UserSessionManager.getUserId(this)
         lifecycleScope.launch {
@@ -134,6 +157,9 @@ class ManageCategoriesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Adds a new category to the database and refreshes the UI.
+     */
     private fun addCategory(category: Category) {
         val userId = UserSessionManager.getUserId(this)
         lifecycleScope.launch {
@@ -141,5 +167,14 @@ class ManageCategoriesActivity : AppCompatActivity() {
             loadCategories(userId)
             updateTotalBudget(userId)
         }
+    }
+
+    /**
+     * Redirects the user to the login screen.
+     */
+    private fun redirectToLogin() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
